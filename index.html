@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金汤 | JINTANG 核心控制台</title>
+    <style>
+        :root {
+            --primary-color: #f1c40f;
+            --bg-color: #1a1a1a;
+            --card-bg: #2c2c2c;
+            --text-color: #e0e0e0;
+            --input-bg: #333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- 导航栏 --- */
+        header {
+            background: #000;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--primary-color);
+        }
+
+        /* --- 页面切换逻辑 --- */
+        .page-section {
+            display: none; /* 默认隐藏所有页面 */
+            padding: 4rem 5%;
+            flex: 1;
+            animation: fadeIn 0.5s;
+        }
+
+        .page-section.active {
+            display: block; /* 激活时显示 */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 首页样式 --- */
+        .hero { text-align: center; }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+        .hero p { font-size: 1.2rem; color: #aaa; white-space: nowrap; margin: 0 auto; max-width: 800px;}
+        .btn {
+            display: inline-block; margin-top: 2rem; padding: 0.8rem 2rem;
+            background: var(--primary-color); color: #000; text-decoration: none;
+            font-weight: bold; border-radius: 4px; cursor: pointer; border: none;
+        }
+        .btn:hover { background: #fff; box-shadow: 0 0 15px var(--primary-color); }
+
+        /* --- 登录页样式 --- */
+        .login-container {
+            max-width: 400px; margin: 0 auto; background: var(--card-bg);
+            padding: 3rem; border-radius: 8px; border: 1px solid var(--primary-color);
+            text-align: center;
+        }
+        .login-container h2 { color: var(--primary-color); margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .input-group input {
+            width: 100%; padding: 10px; background: var(--input-bg);
+            border: 1px solid #444; color: #fff; border-radius: 4px;
+        }
+        .input-group input:focus { outline: none; border-color: var(--primary-color); }
+
+        /* --- 下载与安装样式 --- */
+        .download-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;
+        }
+        .d-card {
+            background: var(--card-bg); padding: 2rem; border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        .d-card h3 { margin-bottom: 1rem; color: var(--primary-color); }
+        .version-tag {
+            background: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; color: #fff;
+        }
+        .code-block {
+            background: #000; padding: 1rem; margin-top: 1rem;
+            font-family: 'Courier New', monospace; color: #0f0; font-size: 0.9rem;
+            border-radius: 4px; overflow-x: auto;
+        }
+
+        /* --- 使用说明样式 --- */
+        .manual-content { max-width: 800px; margin: 0 auto; }
+        .manual-item { margin-bottom: 2rem; }
+        .manual-item h3 { color: var(--primary-color); border-bottom: 1px solid #444; padding-bottom: 0.5rem; margin-bottom: 1rem;}
+        .step { margin-left: 1.5rem; margin-bottom: 0.5rem; color: #ccc; }
+
+        /* --- 关于我们样式 --- */
+        .about-content { text-align: center; max-width: 700px; margin: 0 auto; }
+        .about-content h2 { color: var(--primary-color); margin-bottom: 1.5rem; }
+        
+        /* --- 底部 --- */
+        footer { text-align: center; padding: 2rem; background: #000; color: #666; font-size: 0.8rem; margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <header>
+        <div class="logo" onclick="switchPage('home')">JINTANG // 金汤</div>
+        <nav>
+            <ul>
+                <li><a onclick="switchPage('home')" id="nav-home">首页</a></li>
+                <li><a onclick="switchPage('login')" id="nav-login">系统登录</a></li>
+                <li><a onclick="switchPage('download')" id="nav-download">下载/安装</a></li>
+                <li><a onclick="switchPage('manual')" id="nav-manual">使用说明</a></li>
+                <li><a onclick="switchPage('about')" id="nav-about">关于我们</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 1. 首页 -->
+    <section id="home" class="page-section active">
+        <div class="hero">
+            <h1>固若金汤 · 坚不可摧</h1>
+            <p>下一代分布式防御架构与数据堡垒系统。为您的数字资产提供军事级安全隔离。</p>
+            <button class="btn" onclick="switchPage('download')">立即部署</button>
+        </div>
+    </section>
+
+    <!-- 2. 登录页 -->
+    <section id="login" class="page-section">
+        <div class="login-container">
+            <h2>管理员登录</h2>
+            <form onsubmit="event.preventDefault(); alert('金汤系统：演示模式，登录成功！');">
+                <div class="input-group">
+                    <label>用户名 / ID</label>
+                    <input type="text" placeholder="请输入管理员账号" value="admin">
+                </div>
+                <div class="input-group">
+                    <label>访问密钥 / 密码</label>
+                    <input type="password" placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">接入系统</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.8rem; color: #666;">安全协议：AES-256 加密传输</p>
+        </div>
+    </section>
+
+    <!-- 3. 下载与安装 -->
+    <section id="download" class="page-section">
+        <h2 style="text-align: center; margin-bottom: 3rem; color: var(--primary-color);">下载与部署</h2>
+        <div class="download-grid">
+            <div class="d-card">
+                <h3>Windows 客户端</h3>
+                <p>适用于 Windows 10/11 专业版及服务器版。</p>
+                <p style="margin-top: 1rem;"><span class="version-tag">v1.0.2 Stable</span></p>
+                <button class="btn" style="margin-top: 1rem; width: 100%;">下载 .exe 安装包</button>
+            </div>
+            <div class="d-card">
+                <h3>Linux 核心镜像</h3>
+                <p>适用于 Ubuntu, CentOS, Debian 等主流发行版。</p>
+                <p style="margin-top: 1rem;"><span class="version-tag">Docker Image</span></p>
+                <div class="code-block">
+                    docker pull jin-tang/core:latest
+                </div>
+            </div>
+            <div class="d-card">
+                <h3>macOS 终端工具</h3>
+                <p>适用于 macOS Monterey 及以上版本 (M1/M2芯片适配)。</p>
+                <p style="margin-top: 1rem;"><span class="version-tag">v1.0.1 Beta</span></p>
+                <button class="btn" style="margin-top: 1rem; width: 100%;">下载 .dmg 镜像</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 使用说明 -->
+    <section id="manual" class="page-section">
+        <div class="manual-content">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: var(--primary-color);">快速上手指南</h2>
+            
+            <div class="manual-item">
+                <h3>1. 环境准备</h3>
+                <p class="step">• 确保您的服务器已开放 8080 端口。</p>
+                <p class="step">• 拥有 Docker 运行环境（推荐版本 20.10+）。</p>
+            </div>
+
+            <div class="manual-item">
+                <h3>2. 配置文件</h3>
+                <p class="step">• 在项目根目录创建 `config.json`。</p>
+                <p class="step">• 设置 `defense_level` 为 `high` 以开启主动防御。</p>
+            </div>
+
+            <div class="manual-item">
+                <h3>3. 启动服务</h3>
+                <div class="code-block">
+                    docker-compose up -d
+                </div>
+                <p class="step" style="margin-top: 10px;">• 启动后，访问 `http://localhost:8080` 即可看到此页面。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. 关于我们 -->
+    <section id="about" class="page-section">
+        <div class="about-content">
+            <h2>关于金汤实验室</h2>
+            <p style="margin-bottom: 1.5rem; color: #aaa;">
+                金汤（JinTang）致力于构建下一代数字安全防御体系。我们的名字，来源于中国成语“固若金汤”，寓意我们的系统，像金属铸造的长城，但有云动水涌，亦金汤稳固而形成护城河一样，坚不可摧。
+            </p>
+            <p style="color: #aaa;">
+                我们专注于边缘计算安全、零信任架构以及自动化威胁阻断技术。
+            </p>
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333;">
+                <p>联系方式: contact@jintang-defense.com</p>
+                <p>地址: 数字高地 · 云端大厦 808室</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 金汤防务系统 (Jintang Defense System). All Rights Reserved.</p>
+        <p>创意创建开发者：          南山居士  /  尘间盲克    </p>
+        <p>创意创建技术协助：      QWJSZ  /  DBJSZ  </P>
+        <p>版权所有，司法保护。欢迎使用，拒绝盗仿。
+    </footer>
+    <br>
+
+   <footer>
+   <small>
+    <p>我们真诚欢迎您，赤子热忱，或自愿贡献代码智慧，或自愿贡献力所能及的力量，或为项目发展，基金构建，出力赞助，为项目提供资金，或社会资源协调襄助。</p>
+</smdll>
+</footer>
+</div>
+
+
+    <!-- 简单的脚本：用于切换页面 -->
+    <script>
+        function switchPage(pageId) {
+            // 1. 隐藏所有页面
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 2. 取消所有导航激活状态
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // 3. 显示目标页面
+            document.getElementById(pageId).classList.add('active');
+
+            // 4. 激活对应导航按钮
+            const activeNav = document.getElementById('nav-' + pageId);
+            if(activeNav) activeNav.classList.add('active');
+            
+            // 5. 滚动到顶部
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
