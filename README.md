@@ -67,5 +67,36 @@
 
 \## 🚀 运行方式
 
-\*(......)\*
+\*(---
+
+### 🚀 如何运行
+
+#### 方法一：使用 Docker 运行（推荐）
+
+这是最简单、最不容易出错的方式。
+
+1.  **构建镜像**
+    在项目根目录下执行：
+    ```bash
+    docker build -t jintang-waf .
+    ```
+
+2.  **启动容器**
+    ```bash
+    docker run -d -p 80:80 --name jintang jintang-waf
+    ```
+
+#### 方法二：使用本地脚本运行
+
+如果你已经安装了 OpenResty 或 Nginx，可以使用自带的 `run.sh` 脚本。
+
+1.  **赋予执行权限**
+    ```bash
+    chmod +x run.sh
+    ```
+
+2.  **执行启动**
+    ```bash
+    ./run.sh
+    ```)\*
 
