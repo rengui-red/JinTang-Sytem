@@ -1,0 +1,32 @@
+jintang:
+  # 本地配置
+  local:
+    interface: "eth0"           # 监控网卡
+    capture_duration: 60        # 捕获周期(秒)
+    heartbeat_threshold: 0.95   # 心跳检测阈值
+    process_suspend: true       # 是否挂起恶意进程
+    
+  # 云端配置
+  cloud:
+    endpoint: "https://api.jintang.security"
+    api_key: "${JINTANG_API_KEY}"
+    timeout: 5
+    upload_interval: 300        # 上报间隔(秒)
+    
+  # 行为基线配置
+  behavior:
+    mouse_sample_rate: 100      # 鼠标采样率(Hz)
+    keyboard_window: 50         # 按键窗口(ms)
+    anomaly_threshold: 2.5      # 异常检测标准差倍数
+    
+  # 生物验证配置
+  biometric:
+    face_enabled: true
+    voice_enabled: false
+    brain_computer: false        # 脑机接口(预留)
+    
+  # 熔断配置
+  fuse:
+    auto_block: true
+    block_duration: 3600         # 阻断时长(秒)
+    notify_admin: true

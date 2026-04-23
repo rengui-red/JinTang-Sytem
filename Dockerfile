@@ -1,28 +1,37 @@
-# 1. 使用 Alpine Linux 作为基础镜像
-# 理由：Alpine 极其轻量（只有几兆），非常适合构建小型、安全的镜像
-FROM openresty/openresty:alpine
+FROM python:3.11-slim
 
-# 2. 维护者信息（可选）
-LABEL maintainer="jintang-waf"
+LABEL maintainer="JinTang Security"
+LABEL description="金汤智能端点防御与流束识别系统"
 
-# 3. 移除默认配置，准备放入我们的定制配置
-# 这一步是为了确保环境干净，没有默认网站的干扰
-RUN rm -rf /usr/local/openresty/nginx/conf/conf.d/*
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    tcpdump \
+    net-tools \
+    iptables \
+    iproute2 \
+    procps \
+    libpcap-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    alsa-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-# 4. 复制项目文件到镜像中
-# 将本地的配置文件复制到镜像的标准配置路径
-COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
-# 将 WAF 逻辑脚本复制到指定目录
-COPY WAF.lua /usr/local/openresty/nginx/WAF.lua
-# 将前端页面文件复制进去
-COPY index.html /usr/local/openresty/nginx/html/index.html
-COPY LOGO-index.html /usr/local/openresty/nginx/html/LOGO-index.html
+WORKDIR /app
 
-# 5. 暴露端口
-# 告诉 Docker 容器在运行时会监听 80 端口
-EXPOSE 80
+# 复制依赖文件
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. 设置启动命令
-# 以前台模式启动 OpenResty (Nginx)，这样容器才不会启动后立马退出
-# "daemon off;" 是关键，它让 Nginx 在控制台运行，Docker 才能监控到它的状态
-CMD ["sh", "-c", "openresty -g 'daemon off;'"]
+# 复制源代码
+COPY src/ ./src/
+COPY main.py .
+COPY config.yaml .
+
+# 创建数据目录
+RUN mkdir -p /var/log/jintang /var/lib/jintang
+
+# 暴露端口 (如有需要)
+EXPOSE 8080
+
+# 运行
+CMD ["python", "main.py"]
